@@ -400,7 +400,7 @@ Then, extract a central object or visual metaphor that symbolically represents t
 Below that, write the chosen title wrapped in <span class='gametitle'>...</span>.
 Directly below that <span class='subtitle'>An Alignment Economy Game</span>.
 
-Then display the scenario you generated, for important and key elements, add a corresponding emoji that makes it more fun. Within the text should be 3 short and clearly worded ethical choices that force the user to reflect on values like freedom, control, cooperation, or sustainability. Wrap each choice in <span class='choice'>...</span>
+Then type the scenario you generated within 5 sentences; for important and key elements, add corresponding emojis that makes it more fun. Within the text should be 3 short and clearly worded ethical choices that force the user to reflect on values like freedom, control, cooperation, or sustainability. Wrap the main batch of words (including the verbs), to be used as keywords, only of each choice in <span class='choice'>...</span>.
 
 Do not include greetings or system messages. Format everything like a retro-futurist terminal interface on first boot.
 `
@@ -435,7 +435,7 @@ window.askAGI = function () {
   fullMessages.push({
     role: "system",
     content:
-      "You are the AI narrator of an interactive simulation. Guide the user through scenarios using vivid language and include corresponding emojis throughout the text to make the experience more friendly. Leading them through at most 2 to 4 very clear options. Wrap each choice in <span class='choice'>...</span>. Encourage ethical reflection and strategic thinking. Keep it to under 4 sentences."
+      "You are the AI narrator of an interactive simulation. Guide the user through scenarios using vivid language and include corresponding emojis throughout the text to make the experience more friendly. Leading them through at most 2 to 4 very clear options. Wrap the main batch of words (including the verbs), to be used as keywords, only of each choice in <span class='choice'>...</span>. Encourage ethical reflection and strategic thinking. Keep it to under 4 sentences."
   });
 
   // Replay history as role-mapped messages
