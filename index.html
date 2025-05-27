@@ -389,19 +389,24 @@ function sendToRAG(question) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ question: question })
   })
-  .then(res => res.json())
-    .then(data => {
-    const answer = data.answer || "(no response)";
-    window.chatHistory.push({ sender: "agi", text: answer });
+.then(res => res.json())
+.then(data => {
+  const answer = (data.answer || "(no response)")
+    .replace(/^```[\s\n]?/, "")
+    .replace(/```$/, "")
+    .trim();
 
-    // Log the retrieved chunks to the console
-    if (data.source_chunks) {
-      console.log("🔍 Source Chunks from RAG:");
-      data.source_chunks.forEach((chunk, idx) => {
-        console.log(`[${idx + 1}] ${chunk}`);
-      });
-    }
-  })
+  window.chatHistory.push({ sender: "agi", text: answer });
+
+  // Log the retrieved chunks to the console
+  if (data.source_chunks) {
+    console.log("🔍 Source Chunks from RAG:");
+    data.source_chunks.forEach((chunk, idx) => {
+      console.log(`[${idx + 1}] ${chunk}`);
+    });
+  }
+})
+
   .catch(err => {
     console.error("RAG error:", err);
     window.chatHistory.push({ sender: "agi", text: "⚠️ Error talking to the RAG system." });
