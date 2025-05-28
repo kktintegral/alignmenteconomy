@@ -336,7 +336,19 @@ html, body {
   font-weight: bold;
   margin-top: 0em;
   margin-bottom: 0em;
-}</style><script role="script" id="twine-user-script" type="text/twine-javascript">window.isInitializing = true;
+}
+.banner-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.5em;
+}
+
+.banner-img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+</style><script role="script" id="twine-user-script" type="text/twine-javascript">window.isInitializing = true;
 
 
 // ========== SHARED AGI FETCH FUNCTION ==========
@@ -439,7 +451,7 @@ sendToAGI({
 
 First, internally generate a short, vivid scenario (max 6 sentences) that places the player in a high-stakes ethical or strategic decision point. The scenario should reflect tensions like resource scarcity, AI governance, decentralization, ecological collapse, or techno-utopian control. From this scenario, come up with an epic title for the game, similar to those of movies and novels.
 
-Then, extract a central object or visual metaphor that symbolically represents the scenario. Render this symbol in complex detail as large bold ASCII art up to 10 characters per line (max 5 lines). Use a combination of different density Unicode symbols to give the artwork visual weight and boldness. Wrap the entire block in: <span class='ascii-art'>...</span>
+At the very top, insert the following: <img src="https://static.wixstatic.com/media/3dcbf1_6b1aeab71dbb4111a038b3a22408e907~mv2.gif" class="banner-img">
 
 Below that, write the chosen title wrapped in <span class='gametitle'>...</span>.
 Directly below that <span class='subtitle'>An Alignment Economy Game</span>.
@@ -573,6 +585,8 @@ function waitForChatlogThenUpdate() {
 }
 
 waitForChatlogThenUpdate();
+
+
 </script><tw-passagedata pid="1" name="Start" tags="" position="600,375" size="100,100">&lt;&lt;script&gt;&gt;
 $(document).one(&#39;:passagerender&#39;, function () {
   if (typeof UIBar !== &#39;undefined&#39;) {
