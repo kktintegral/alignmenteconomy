@@ -351,6 +351,11 @@ html, body {
 }
 </style><script role="script" id="twine-user-script" type="text/twine-javascript">window.isInitializing = true;
 
+// Wake up the RAG backend silently on load
+fetch("https://rag-backend-nmss.onrender.com/warmup", {
+  method: "POST"
+}).catch(err => console.log("RAG warmup failed:", err));
+
 
 // ========== SHARED AGI FETCH FUNCTION ==========
 
