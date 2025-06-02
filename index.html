@@ -447,31 +447,26 @@ if (!window.chatHistory || window.chatHistory.length === 0) {
     window.hasInitializedScenario = true;
 
 
-sendToAGI({
-  temperature: 0.9,
-  max_tokens: 900,
-  messages: [
-    {
-      role: "system",
-      content: `You are the AI narrator of an interactive simulation set in a speculative post-alignment economy world.
+fetch("https://rag-backend-nmss.onrender.com/prompt/open")
+  .then(res => res.json())
+  .then(data => {
+    const openingPrompt = data.prompt || "";
 
-First, internally generate a short, vivid scenario (max 6 sentences) that places the player in a high-stakes ethical or strategic decision point. The scenario should reflect tensions like resource scarcity, AI governance, decentralization, ecological collapse, or techno-utopian control. From this scenario, come up with an epic title for the game, similar to those of movies and novels.
-
-At the very top of your response, display the following HTML image without backticks or code blocks: <img src="https://static.wixstatic.com/media/3dcbf1_6b1aeab71dbb4111a038b3a22408e907~mv2.gif" class="banner-img">
-
-Below that, write the chosen title wrapped in <span class='gametitle'>...</span>.
-Directly below that <span class='subtitle'>An Alignment Economy Game</span>.
-
-Then type the scenario you generated within 5 sentences; for important and key elements, add corresponding emojis that makes it more fun. Within the text should be 3 short and clearly worded ethical choices that force the user to reflect on values like freedom, control, cooperation, or sustainability. Wrap the main batch of words (including the verbs), to be used as keywords, only of each choice in <span class='choice'>...</span>.
-
-Do not include greetings or system messages. Format everything like a retro-futurist terminal interface on first boot.`
-    },
-    {
-      role: "user",
-      content: "" // trigger initial generation
-    }
-  ]
-});
+    sendToAGI({
+      temperature: 0.9,
+      max_tokens: 900,
+      messages: [
+        {
+          role: "system",
+          content: openingPrompt
+        },
+        {
+          role: "user",
+          content: ""
+        }
+      ]
+    });
+  });
 
 
 
