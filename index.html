@@ -444,7 +444,7 @@ function sendToRAG(question) {
       .replace(/```$/, "")
       .trim();
 
-    const imagePrompt = "An artistic scene inspired by the Neoplatonic ideal of human grandeur, visually depicting a symbolic moment of choice. The image should convey transcendence, moral weight, and the tension of decision-making, and will be used to represent the following scenario — no text or words in the image." + answer;
+    const imagePrompt = "An artistic scene inspired by the Neoplatonic ideal of human grandeur, visually depicting a symbolic moment of choice. The image will be used to represent the following scenario — no text or words in the image." + answer;
       generateImage(imagePrompt, function(url) {
       if (url) {
         const img = new Image();
