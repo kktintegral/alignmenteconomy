@@ -145,7 +145,7 @@ html, body {
 
 .chat-message {
   max-width: 100%;
-  line-height: 1.4;
+  line-height: 0;
   margin-bottom: 0.1em;
 }
 
@@ -153,6 +153,7 @@ html, body {
   display: block;
   width: 100%;
   margin: 0;
+  line-height: 1.4;
   margin-bottom: 0em !important;
   padding: 0;
 }
@@ -169,7 +170,7 @@ html, body {
   word-break: break-word;
   box-sizing: border-box;
   line-height: 1.4;
-  margin-top: 40px;
+  margin-top: 0px;
   margin-bottom: 40px;
 }
 
@@ -285,7 +286,7 @@ html, body {
 }
 
 
-.bubble {
+.chat-message.user .bubble {
   margin: 0;
   padding-top: 0.4em;
   padding-bottom: 0.4em;
@@ -349,6 +350,35 @@ html, body {
   height: auto;
   border-radius: 6px;
 }
+
+/* === Image wrapped inside AGI message === */
+.chat-message.agi .wrapped-image {
+  float: left;
+  width: 240px;
+  height: auto;
+  margin-right: 20px;
+  margin-bottom: 8px;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* === Clear fix to avoid layout issues for next message === */
+.chat-message.agi::after {
+  content: "";
+  display: block;
+  clear: both;
+}
+
+.chat-message.agi .bubble {
+  margin: 0;
+  padding: 0;
+  white-space: pre-wrap;
+  color: #00ffcc;
+  font-family: 'Courier New', Courier, monospace;
+  line-height: 1.4;
+  background: none;
+}
+
 </style><script role="script" id="twine-user-script" type="text/twine-javascript">window.isInitializing = true;
 
 // Wake up the RAG backend silently on load
@@ -407,35 +437,105 @@ function sendToRAG(question) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ question: question })
   })
-.then(res => res.json())
-.then(data => {
-  const answer = (data.answer || "(no response)")
-    .replace(/^```[\s\n]?/, "")
-    .replace(/```$/, "")
-    .trim();
+  .then(res => res.json())
+  .then(data => {
+    const answer = (data.answer || "(no response)")
+      .replace(/^```[\s\n]?/, "")
+      .replace(/```$/, "")
+      .trim();
 
-  window.chatHistory.push({ sender: "agi", text: answer });
+    const imagePrompt = "An artistic scene inspired by the Neoplatonic ideal of human grandeur, visually depicting a symbolic moment of choice. The image should convey transcendence, moral weight, and the tension of decision-making, and will be used to represent the following scenario — no text or words in the image." + answer;
+      generateImage(imagePrompt, function(url) {
+      if (url) {
+        const img = new Image();
+        img.onload = function () {
+          // Only push once it's actually loaded
+          window.chatHistory.push({
+            sender: "agi",
+            text: answer,
+            image: url
+          });
 
-  // Log the retrieved chunks to the console
-  if (data.source_chunks) {
-    console.log("🔍 Source Chunks from RAG:");
-    data.source_chunks.forEach((chunk, idx) => {
-      console.log(`[${idx + 1}] ${chunk}`);
+          window.isTyping = false;
+          updateChat();
+          updateFakeCursor();
+          window.allowInput = true;
+        };
+        img.onerror = function () {
+          // Fallback to text only
+          window.chatHistory.push({
+            sender: "agi",
+            text: answer
+          });
+
+          window.isTyping = false;
+          updateChat();
+          updateFakeCursor();
+          window.allowInput = true;
+        };
+        img.src = url;
+      } else {
+        // No image generated — just show text
+        window.chatHistory.push({
+          sender: "agi",
+          text: answer
+        });
+        window.isTyping = false;
+        updateChat();
+        updateFakeCursor();
+        window.allowInput = true;
+      }
+
+      // ✅ MOVE isTyping reset + UI updates here
+      window.isTyping = false;
+      updateChat();
+      updateFakeCursor();
+      window.allowInput = true;
     });
-  }
-})
+      
 
+
+    // ✅ Log source chunks if available
+    if (data.source_chunks) {
+      console.log("🔍 Source Chunks from RAG:");
+      data.source_chunks.forEach((chunk, idx) => {
+        console.log(`[${idx + 1}] ${chunk}`);
+      });
+    }
+  })
   .catch(err => {
     console.error("RAG error:", err);
     window.chatHistory.push({ sender: "agi", text: "⚠️ Error talking to the RAG system." });
   })
-  .finally(() => {
-    window.isTyping = false;
-    updateChat();
-    updateFakeCursor();
-    window.allowInput = true;
+
+}
+
+function generateImage(prompt, callback) {
+  fetch("https://rag-backend-nmss.onrender.com/generate-image", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      prompt: prompt,
+      n: 1,
+      size: "1024x1024"
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.urls && data.urls.length > 0) {
+      callback(data.urls[0]);  // ✅ Success
+    } else {
+      callback(null);          // ❌ No URL
+    }
+  })
+  .catch(error => {
+    console.error("Image generation error:", error);
+    callback(null);
   });
 }
+
 
 
 // ========== INITIALIZE OPENING SCENARIO ==========
@@ -507,8 +607,24 @@ function updateChat() {
 
   const messages = window.chatHistory.map(entry => {
   const isUser = entry.sender === "user";
-  return `<div class="chat-message ${isUser ? "user" : "agi"}"><div class="bubble">${entry.text}</div></div>`;
+
+  if (entry.image && !isUser) {
+    return `
+    <div class="chat-message agi">
+      <img class="wrapped-image" src="${entry.image}" alt="Generated image">
+      <div class="bubble">${entry.text}</div>
+    </div>
+  `;
+
+  } else {
+    return `
+      <div class="chat-message ${isUser ? "user" : "agi"}">
+        <div class="bubble">${entry.text}</div>
+      </div>
+    `;
+  }
 }).join("");
+
 
 
   let typing = "";
