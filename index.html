@@ -443,9 +443,6 @@ function sendToRAG(question) {
   const priorContext = `Initial scenario:\n${window.initialAgiResponse || ""}\n\nRecent player inputs:\n${recentChoices}`;
 
 
-  console.log("🧠 context:", priorContext);
-  console.log("❓ question:", question);
-
   return fetch("https://rag-backend-nmss.onrender.com/rag", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -574,7 +571,7 @@ fetch("https://rag-backend-nmss.onrender.com/prompt/open")
 
     sendToAGI({
       temperature: 0.9,
-      max_tokens: 900,
+      max_tokens: 2000,
       messages: [
         {
           role: "system",
