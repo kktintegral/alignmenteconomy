@@ -386,6 +386,7 @@ fetch("https://rag-backend-nmss.onrender.com/warmup", {
   method: "POST"
 }).catch(err => console.log("RAG warmup failed:", err));
 
+if (!window.choiceLog) window.choiceLog = [];
 
 // ========== SHARED AGI FETCH FUNCTION ==========
 
@@ -406,6 +407,10 @@ function sendToAGI({ input, context, messages, temperature = 0.7, max_tokens = 3
   })
     .then(res => res.json())
     .then(data => {
+      const output = data.output || "(no response)";
+
+      // ✅ STORE INITIAL AI RESPONSE
+      window.initialAgiResponse = output;
       window.chatHistory.push({
   sender: "agi",
   text: data.output || "(no response)",
@@ -432,10 +437,22 @@ function sendToRAG(question) {
   window.isTyping = true;
   updateChat();
 
+  const recentChoices = window.choiceLog.slice(-3).map((c, i) => `Turn ${window.choiceLog.length - 3 + i + 1}: ${c}`).join("\n");
+
+  // ✅ Only use AI's initial output in the context
+  const priorContext = `Initial scenario:\n${window.initialAgiResponse || ""}\n\nRecent player inputs:\n${recentChoices}`;
+
+
+  console.log("🧠 context:", priorContext);
+  console.log("❓ question:", question);
+
   return fetch("https://rag-backend-nmss.onrender.com/rag", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ question: question })
+    body: JSON.stringify({
+      question: question,
+      context: priorContext
+    })
   })
   .then(res => res.json())
   .then(data => {
@@ -552,6 +569,9 @@ fetch("https://rag-backend-nmss.onrender.com/prompt/open")
   .then(data => {
     const openingPrompt = data.prompt || "";
 
+    // 🔁 Store it globally
+    window.openingPrompt = openingPrompt;
+
     sendToAGI({
       temperature: 0.9,
       max_tokens: 900,
@@ -586,7 +606,13 @@ window.askAGI = function () {
 
   const inputEl = document.getElementById("agiInput");
   const input = inputEl.value.trim();
-  if (!input) return;
+  if (!input) return;  // ✅ First, skip if input is empty
+
+  // ✅ Then log the choice if it's new
+  if (!window.choiceLog.includes(input)) {
+    window.choiceLog.push(input);
+  }
+
 
   const formattedInput = `<span class="cmdPrefix">>></span> ${input}`;
   window.chatHistory.push({ sender: "user", text: formattedInput });
