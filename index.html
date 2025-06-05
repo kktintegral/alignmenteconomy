@@ -123,7 +123,6 @@ html, body {
   display: flex;
   flex-direction: column;
   height: 90vh;
-  background: #121212;
   overflow: hidden;
 }
 
@@ -192,7 +191,6 @@ html, body {
   display: flex;
   align-items: center;
   padding: 0.5em 1em;
-  background: #121212;
   border-top: 1px solid #333;
   font-family: 'Courier New', monospace;
   color: #00ffcc;
@@ -379,6 +377,36 @@ html, body {
   background: none;
 }
 
+#background-layer {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/images/grey.png')
+  background-color: #444;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -2;
+
+  /* ✅ Add a smooth transition on background image and opacity */
+  transition: background-image 1.2s ease-in-out, opacity 1.2s ease-in-out;
+  opacity: 1;
+}
+
+#background-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.9); /* 70% dark overlay */
+  z-index: -1;
+}
+
+#chatbox {
+  position: relative;
+  z-index: 0;
+}
 </style><script role="script" id="twine-user-script" type="text/twine-javascript">window.isInitializing = true;
 
 // Wake up the RAG backend silently on load
@@ -463,6 +491,7 @@ function sendToRAG(question) {
       if (url) {
         const img = new Image();
         img.onload = function () {
+          document.getElementById("background-layer").style.backgroundImage = `url('${url}')`;
           // Only push once it's actually loaded
           window.chatHistory.push({
             sender: "agi",
@@ -736,6 +765,9 @@ $(document).one(&#39;:passagerender&#39;, function () {
   }
 });
 &lt;&lt;/script&gt;&gt;
+&lt;div id=&quot;background-layer&quot;&gt;
+  &lt;div id=&quot;background-overlay&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
 &lt;div id=&quot;chatbox&quot;&gt;
   &lt;div id=&quot;chatlog&quot;&gt;&lt;/div&gt;
 &lt;div id=&quot;inputArea&quot;&gt;
