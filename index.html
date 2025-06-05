@@ -435,14 +435,15 @@ function sendToAGI({ input, context, messages, temperature = 0.7, max_tokens = 3
     .then(res => res.json())
     .then(data => {
       const output = data.output || "(no response)";
-      document.getElementById("background-layer").style.backgroundImage = `images/grey.png')`;
       // ✅ STORE INITIAL AI RESPONSE
       window.initialAgiResponse = output;
       window.chatHistory.push({
-  sender: "agi",
-  text: data.output || "(no response)",
-  init: true  // ✅ mark it as the scenario intro
-});
+        sender: "agi",
+        text: data.output || "(no response)",
+        init: true  // ✅ mark it as the scenario intro
+      });
+      document.getElementById("background-layer").style.backgroundImage = `url('images/grey.png')`;
+
 
     })
     .catch(err => {
