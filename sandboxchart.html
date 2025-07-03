@@ -1,48 +1,36 @@
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  class ChartFrame extends HTMLElement {
-    static get observedAttributes() {
-      return ['data-chart'];
-    }
-
-    constructor() {
-      super();
-      this.shadow = this.attachShadow({ mode: "open" });
-      this.canvas = document.createElement("canvas");
-      this.canvas.width = 400;
-      this.canvas.height = 300;
-      this.canvas.style.background = "#f0f0f0";
-      this.shadow.appendChild(this.canvas);
-    }
-
-    attributeChangedCallback(name, oldValue, newValue) {
-      if (name === 'data-chart') {
-        const chartData = JSON.parse(newValue);
-        setTimeout(() => this.renderChart(chartData), 300);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chart</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { margin: 0; }
+    canvas { width: 100% !important; height: 100% !important; }
+  </style>
+</head>
+<body>
+  <canvas id="myChart"></canvas>
+  <script>
+    // Listen for messages from parent page
+    window.addEventListener("message", (event) => {
+      if (event.data?.type === "chartData") {
+        const data = event.data.payload;
+        renderChart(data);
       }
+    });
+
+    // Render chart function
+    function renderChart(data) {
+      new Chart(document.getElementById("myChart").getContext("2d"), {
+        type: "line",
+        data,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      });
     }
-
-    renderChart(data) {
-      const ctx = this.canvas.getContext("2d");
-
-      if (!this.chart) {
-        this.chart = new Chart(ctx, {
-          type: 'line',
-          data,
-          options: {
-            responsive: false,
-            animation: false,
-            scales: {
-              y: { beginAtZero: true }
-            }
-          }
-        });
-      } else {
-        this.chart.data = data;
-        this.chart.update();
-      }
-    }
-  }
-
-  customElements.define('chart-frame', ChartFrame);
-</script>
+  </script>
+</body>
+</html>
